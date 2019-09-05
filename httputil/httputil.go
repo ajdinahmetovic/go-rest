@@ -49,3 +49,8 @@ func WriteResponse(w http.ResponseWriter, message string) {
 	w.Write(v)
 
 }
+
+//EnableCors func
+func EnableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
