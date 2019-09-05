@@ -11,6 +11,7 @@ var router = mux.NewRouter()
 //CreateRoutes function initializes routes
 func CreateRoutes() mux.Router {
 	router.HandleFunc("/item", item.Get).Methods("GET")
+	router.HandleFunc("/item", item.Post).Methods("POST")
 	return *router
 }
 

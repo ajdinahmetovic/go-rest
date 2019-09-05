@@ -8,12 +8,13 @@ import (
 
 //Response struct
 type Response struct {
-	ID      int    `json:"id"`
-	Message string `json:"message"`
+	ID      int         `json:"id"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 //WriteError sends error response
-func WriteError(w http.ResponseWriter, message string) {
+func WriteError(w http.ResponseWriter, message string, status int) {
 
 	res := Response{
 		ID:      rand.Intn(1000),
@@ -26,17 +27,18 @@ func WriteError(w http.ResponseWriter, message string) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusNotFound)
+	w.WriteHeader(status)
 	w.Write(v)
 
 }
 
 //WriteResponse ...
-func WriteResponse(w http.ResponseWriter, message string) {
+func WriteResponse(w http.ResponseWriter, message string, data interface{}) {
 
 	res := Response{
 		ID:      rand.Intn(1000),
 		Message: message,
+		Data:    data,
 	}
 
 	v, err := json.Marshal(res)
