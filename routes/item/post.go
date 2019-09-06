@@ -27,9 +27,9 @@ func Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item.ID = len(db.DATA)
+	item.ID = db.GetLenght()
 
-	db.AddItem(item)
+	db.AddItem(&item)
 	httputil.WriteResponse(w, "Saved succesfully", nil)
 
 }

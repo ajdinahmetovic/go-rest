@@ -34,7 +34,6 @@ func WriteError(w http.ResponseWriter, message string, status int) {
 
 //WriteResponse ...
 func WriteResponse(w http.ResponseWriter, message string, data interface{}) {
-
 	res := Response{
 		ID:      rand.Intn(1000),
 		Message: message,
@@ -44,12 +43,12 @@ func WriteResponse(w http.ResponseWriter, message string, data interface{}) {
 	v, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(v)
-
 }
 
 //EnableCors func

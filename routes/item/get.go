@@ -1,53 +1,65 @@
 package item
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/ajdinahmetovic/go-rest/db"
 	"github.com/ajdinahmetovic/go-rest/httputil"
 )
 
-//Get func
-func Get(w http.ResponseWriter, r *http.Request) {
+//GetItem func
+func GetItem(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w)
 	v := r.URL.Query()
-	id, err := strconv.Atoi(v.Get("id"))
-
-	if err != nil {
-		httputil.WriteError(w, "Invalid ID ", http.StatusNotFound)
-		fmt.Println(err)
-		return
-	}
-
+	id := v.Get("id")
 	title := v.Get("title")
 	description := v.Get("description")
 
-	//Validate query params
-	if title == "" {
-		httputil.WriteError(w, "Title missing", http.StatusNotFound)
+	if id == "" && title == "" && description == "" {
+		httputil.WriteResponse(w, "All items", *db.GetAllItems())
 		return
 	}
 
-	if description == "" {
-		httputil.WriteError(w, "Description missing", http.StatusNotFound)
-		return
+	data := *db.GetAllItems()
+	var filter []db.Item
+	/*
+		if _id, err := strconv.Atoi(id); err != nil {
+			for _, i := range data {
+				if i.ID == _id {
+					filter = append(filter, i)
+				}
+			}
+		}
+	*/
+
+	_id, err := strconv.Atoi(id)
+	if err != nil {
+		_id = -1
 	}
 
-	item := db.Item{
-		ID:          id,
-		Title:       title,
-		Description: description,
-	}
-
-	for _, i := range db.DATA {
-		if i == item {
-			httputil.WriteResponse(w, "Item found", item)
-			return
+	for _, i := range data {
+		if strings.HasPrefix(i.Title, title) && strings.HasPrefix(i.Description, description) && (i.ID == _id || _id == -1) {
+			filter = append(filter, i)
 		}
 	}
 
-	httputil.WriteError(w, "Item NOT found", http.StatusNotFound)
+	httputil.WriteResponse(w, "Items found", filter)
+
+	/*
+		_id, err := strconv.Atoi(id)
+		if err != nil {
+
+			return
+		}
+		item := db.FindItem(_id)
+
+		if item != nil {
+			httputil.WriteResponse(w, "Item found", &item)
+		} else {
+			httputil.WriteError(w, "Item NOT found", http.StatusNotFound)
+		}
+	*/
 
 }
