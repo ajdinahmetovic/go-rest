@@ -13,19 +13,19 @@ import (
 func GetItem(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w)
 	v := r.URL.Query()
-	id := v.Get("id")
+	id, err := strconv.Atoi(v.Get("id"))
+	if err != nil {
+		id = -1
+	}
+
 	title := v.Get("title")
 	description := v.Get("description")
 
 	data := *db.GetAllItems()
 	var filter []db.Item
-	_id, err := strconv.Atoi(id)
-	if err != nil {
-		_id = -1
-	}
 
 	for _, i := range data {
-		if strings.HasPrefix(i.Title, title) && strings.HasPrefix(i.Description, description) && (i.ID == _id || _id == -1) {
+		if strings.HasPrefix(i.Title, title) && strings.HasPrefix(i.Description, description) && (i.ID == id || id == -1) {
 			filter = append(filter, i)
 		}
 	}
