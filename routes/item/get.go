@@ -17,23 +17,8 @@ func GetItem(w http.ResponseWriter, r *http.Request) {
 	title := v.Get("title")
 	description := v.Get("description")
 
-	if id == "" && title == "" && description == "" {
-		httputil.WriteResponse(w, "All items", *db.GetAllItems())
-		return
-	}
-
 	data := *db.GetAllItems()
 	var filter []db.Item
-	/*
-		if _id, err := strconv.Atoi(id); err != nil {
-			for _, i := range data {
-				if i.ID == _id {
-					filter = append(filter, i)
-				}
-			}
-		}
-	*/
-
 	_id, err := strconv.Atoi(id)
 	if err != nil {
 		_id = -1
@@ -46,20 +31,4 @@ func GetItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httputil.WriteResponse(w, "Items found", filter)
-
-	/*
-		_id, err := strconv.Atoi(id)
-		if err != nil {
-
-			return
-		}
-		item := db.FindItem(_id)
-
-		if item != nil {
-			httputil.WriteResponse(w, "Item found", &item)
-		} else {
-			httputil.WriteError(w, "Item NOT found", http.StatusNotFound)
-		}
-	*/
-
 }
