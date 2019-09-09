@@ -27,9 +27,13 @@ func Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item.ID = db.GetLenght()
+	//item.ID = db.GetLenght()
 
-	db.AddItem(&item)
+	err = db.AddItem(&item)
+	if err != nil {
+		httputil.WriteError(w, "Error while saving item", http.StatusInternalServerError)
+	}
+
 	httputil.WriteResponse(w, "Saved succesfully", nil)
 
 }
