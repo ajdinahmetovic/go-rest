@@ -12,6 +12,7 @@ import (
 //GetItem func
 func GetItem(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w)
+
 	v := r.URL.Query()
 	id, err := strconv.Atoi(v.Get("id"))
 	if err != nil {
@@ -22,7 +23,7 @@ func GetItem(w http.ResponseWriter, r *http.Request) {
 	description := v.Get("description")
 
 	queryItem := db.Item{ID: id, Title: title, Description: description}
-	item, err := db.FindItem(queryItem)
+	item, err := db.FindItem(&queryItem)
 
 	if err != nil {
 		fmt.Println(err)

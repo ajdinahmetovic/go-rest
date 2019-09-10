@@ -14,8 +14,11 @@ func CreateRoutes() mux.Router {
 
 	db.ConnectDB()
 
+	router.HandleFunc("/item", item.Put).Methods("PUT")
 	router.HandleFunc("/item", item.GetItem).Methods("GET")
 	router.HandleFunc("/item", item.Post).Methods("POST")
+	router.HandleFunc("/item", item.Delete).Methods("DELETE")
+
 	return *router
 }
 

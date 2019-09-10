@@ -63,9 +63,8 @@ func AddItem(item *Item) error {
 }
 
 //FindItem func
-func FindItem(item Item) (*[]Item, error) {
+func FindItem(item *Item) (*[]Item, error) {
 	var data []Item
-
 	var rows *sql.Rows
 	var err error
 
@@ -82,7 +81,6 @@ func FindItem(item Item) (*[]Item, error) {
 
 	} else {
 		rows, err = db.Query(sqlState, item.Title+"%", item.Description+"%")
-
 	}
 
 	if err != nil {
@@ -102,9 +100,7 @@ func FindItem(item Item) (*[]Item, error) {
 		data = append(data, item)
 
 	}
-
 	return &data, nil
-
 }
 
 //GetAllItems func
@@ -121,18 +117,14 @@ func GetAllItems() *[]Item {
 		fmt.Println("Errr", err)
 		return &data
 	}
-
 	defer rows.Close()
-
 	for rows.Next() {
 		item := Item{}
-
 		err = rows.Scan(
 			&item.ID,
 			&item.Title,
 			&item.Description,
 		)
-
 		if err != nil {
 			return &data
 		}
@@ -141,7 +133,33 @@ func GetAllItems() *[]Item {
 	return &data
 }
 
-//GetLenght func
-func GetLenght() int {
-	return len(data)
+//UpdateItem func
+func UpdateItem(item *Item) error {
+
+	sqlState := `
+	UPDATE item 
+	SET title = $1,
+	description = $2
+	WHERE id = $3
+	`
+	_, err := db.Exec(sqlState, item.Title, item.Description, item.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+//DeleteItem func
+func DeleteItem(id int) error {
+	sqlState := `
+	DELETE FROM item 
+	WHERE id = $1`
+	_, err := db.Exec(sqlState, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

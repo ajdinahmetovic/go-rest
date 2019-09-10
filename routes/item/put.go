@@ -9,8 +9,8 @@ import (
 	"github.com/ajdinahmetovic/go-rest/httputil"
 )
 
-//Post func
-func Post(w http.ResponseWriter, r *http.Request) {
+//Put func
+func Put(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w)
 
 	req, err := ioutil.ReadAll(r.Body)
@@ -21,20 +21,18 @@ func Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var item db.Item
-
 	err = json.Unmarshal(req, &item)
 	if err != nil {
 		httputil.WriteError(w, "Check your JSON structure", http.StatusNotAcceptable)
 		return
 	}
 
-	//item.ID = db.GetLenght()
-
-	err = db.AddItem(&item)
+	err = db.UpdateItem(&item)
 	if err != nil {
-		httputil.WriteError(w, "Error while saving item", http.StatusInternalServerError)
+		httputil.WriteError(w, "Falied to update item", http.StatusInternalServerError)
+		return
 	}
 
-	httputil.WriteResponse(w, "Saved succesfully", nil)
+	httputil.WriteResponse(w, "Item updated successfully", nil)
 
 }
