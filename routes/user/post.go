@@ -1,4 +1,4 @@
-package item
+package user
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 
 //Post func
 func Post(w http.ResponseWriter, r *http.Request) {
+
 	httputil.EnableCors(&w)
 
 	req, err := ioutil.ReadAll(r.Body)
@@ -20,22 +21,17 @@ func Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var item db.Item
-
-	err = json.Unmarshal(req, &item)
+	var user db.User
+	err = json.Unmarshal(req, &user)
 	if err != nil {
-		httputil.WriteError(w, "Check your JSON structure", http.StatusNotAcceptable)
+		httputil.WriteError(w, "Check your JSON", http.StatusInternalServerError)
 		return
 	}
 
-	//item.ID = db.GetLenght()
-
-	err = db.AddItem(&item)
+	err = db.AddUser(&user)
 	if err != nil {
-		httputil.WriteError(w, "Error while saving item", http.StatusInternalServerError)
+		httputil.WriteError(w, "Failed to save user", http.StatusInternalServerError)
 		return
 	}
-
-	httputil.WriteResponse(w, "Saved succesfully", nil)
-
+	httputil.WriteResponse(w, "User created successfully", nil)
 }
