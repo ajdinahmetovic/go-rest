@@ -24,7 +24,8 @@ func CreateRoutes() mux.Router {
 	//User routes
 	router.HandleFunc("/user", user.Post).Methods("POST")
 	router.HandleFunc("/user", user.Get).Methods("GET")
-
+	router.HandleFunc("/user", user.Delete).Methods("DELETE")
+	router.HandleFunc("/user", user.Put).Methods("PUT")
 	return *router
 }
 

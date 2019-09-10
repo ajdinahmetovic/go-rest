@@ -1,6 +1,9 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 //User struct
 type User struct {
@@ -18,21 +21,17 @@ func AddUser(user *User) error {
 	VALUES ($1, $2);`
 
 	_, err := db.Exec(sqlState, user.Username, user.FullName)
-
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
 //FindUser func
 func FindUser(user *User) (*[]User, error) {
-
 	var response []User
 	var rows *sql.Rows
 	var itemRows *sql.Rows
-
 	var err error
 
 	sqlItem := `
@@ -88,4 +87,38 @@ func FindUser(user *User) (*[]User, error) {
 		response = append(response, user)
 	}
 	return &response, nil
+}
+
+//DeleteUser func
+func DeleteUser(id int) error {
+	sqlState := `DELETE FROM item
+	WHERE user_id = $1;`
+	_, err := db.Exec(sqlState, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlState = `
+	DELETE FROM app_user
+	WHERE id = $1;`
+	_, err = db.Exec(sqlState, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+//Update func
+func UpdateUser(user *User) error {
+	sqlState := `
+	UPDATE app_user
+	SET username = $1,
+	full_name = $2
+	WHERE id = $3;`
+	_, err := db.Exec(sqlState, user.Username, user.FullName, user.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

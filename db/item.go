@@ -102,19 +102,15 @@ func GetAllItems() *[]Item {
 
 //UpdateItem func
 func UpdateItem(item *Item) error {
-
 	sqlState := `
 	UPDATE item 
 	SET title = $1,
 	description = $2
-	WHERE id = $3
-	`
+	WHERE id = $3`
 	_, err := db.Exec(sqlState, item.Title, item.Description, item.ID)
-
 	if err != nil {
 		return err
 	}
-
 	return nil
 
 }
