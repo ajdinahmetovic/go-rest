@@ -1,0 +1,30 @@
+version: '3'
+services: 
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: db_1
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: tajna
+      PGDATA: /tmp
+    ports:
+      - 5432:5432
+    networks: 
+      apinetwork:
+
+  api:
+    build: .
+    command: ["go", "run", "main.go"]
+    volumes:
+      - .:/go/src/github.com/ajdinahmetovic/go-rest
+    ports:
+      - "3000:3000"
+    depends_on: 
+      - db
+    links:
+      - db
+    networks: 
+      apinetwork:
+networks:
+  apinetwork:
+    driver: bridge

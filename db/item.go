@@ -44,7 +44,6 @@ func FindItem(item *Item) (*[]Item, error) {
 	if item.ID != 0 {
 		sqlState += ` and id = $3`
 		rows, err = db.Query(sqlState, item.Title+"%", item.Description+"%", item.ID)
-
 	} else {
 		rows, err = db.Query(sqlState, item.Title+"%", item.Description+"%")
 	}

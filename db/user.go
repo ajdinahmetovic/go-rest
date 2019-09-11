@@ -109,7 +109,7 @@ func DeleteUser(id int) error {
 	return nil
 }
 
-//Update func
+//UpdateUser func
 func UpdateUser(user *User) error {
 	sqlState := `
 	UPDATE app_user
