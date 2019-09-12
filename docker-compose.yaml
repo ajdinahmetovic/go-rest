@@ -7,6 +7,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: tajna
       PGDATA: /tmp
+    volumes:
+      - ./db/sql/user/1_create.sql:/docker-entrypoint-initdb.d/1-create_user.sql
+      - ./db/sql/item/2_create.sql:/docker-entrypoint-initdb.d/2-create_item.sql
     ports:
       - 5432:5432
     networks: 

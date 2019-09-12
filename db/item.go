@@ -55,9 +55,9 @@ func FindItem(item *Item) (*[]Item, error) {
 	for rows.Next() {
 		item := Item{}
 		err = rows.Scan(
+			&item.ID,
 			&item.Title,
 			&item.Description,
-			&item.ID,
 			&item.UserID,
 		)
 		if err != nil {
