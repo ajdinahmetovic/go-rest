@@ -1,12 +1,13 @@
 package user
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
-	"github.com/ajdinahmetovic/go-rest/db"
-
 	"github.com/ajdinahmetovic/go-rest/httputil"
+	"github.com/ajdinahmetovic/item-service/proto/v1"
+	"google.golang.org/grpc"
 )
 
 //Get func
@@ -19,13 +20,21 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	}
 	username := v.Get("username")
 	fullname := v.Get("fullname")
-	queryUser := db.User{ID: id, Username: username, FullName: fullname}
-
-	users, err := db.FindUser(&queryUser)
-
+	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
 	if err != nil {
-		httputil.WriteError(w, "Error getting users", http.StatusInternalServerError)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-	httputil.WriteResponse(w, "Users fetched successfully", users)
+	client := proto.NewUserServiceClient(conn)
+	res, err := client.GetUser(context.Background(), &proto.GetUserReq{
+		User: &proto.User{
+			ID:       int32(id),
+			Username: username,
+			FullName: fullname,
+		}})
+	if err != nil {
+		httputil.WriteError(w, err, http.StatusInternalServerError)
+		return
+	}
+	httputil.WriteResponse(w, res.Message, res.Users)
 }

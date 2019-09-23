@@ -1,4 +1,4 @@
-package user
+package routes
 
 import (
 	"context"
@@ -6,22 +6,25 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/ajdinahmetovic/go-rest/db"
 	"github.com/ajdinahmetovic/go-rest/httputil"
 	"github.com/ajdinahmetovic/item-service/proto/v1"
 	"google.golang.org/grpc"
 )
 
-//Put func
-func Put(w http.ResponseWriter, r *http.Request) {
+type refreshRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+//RefreshToken func
+func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w)
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-	var user db.User
-	err = json.Unmarshal(req, &user)
+	var refreshRequest refreshRequest
+	err = json.Unmarshal(req, &refreshRequest)
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
@@ -34,16 +37,17 @@ func Put(w http.ResponseWriter, r *http.Request) {
 	}
 	client := proto.NewUserServiceClient(conn)
 
-	res, err := client.UpdateUser(context.Background(), &proto.UpdateUserReq{
-		User: &proto.User{
-			ID:       int32(user.ID),
-			Username: user.Username,
-			FullName: user.FullName,
-		}})
-
+	res, err := client.RefreshToken(context.Background(), &proto.RefreshTokenReq{
+		RefreshToken: refreshRequest.RefreshToken,
+	})
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-	httputil.WriteResponse(w, res.Message, nil)
+
+	httputil.WriteResponse(w, "Token refresed", map[string]string{
+		"refresh_toke": res.RefreshToken,
+		"access_token": res.Token,
+	})
+
 }

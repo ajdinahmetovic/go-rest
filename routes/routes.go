@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/ajdinahmetovic/go-rest/db"
 	"github.com/ajdinahmetovic/go-rest/routes/item"
 	"github.com/ajdinahmetovic/go-rest/routes/user"
 	"github.com/gorilla/mux"
@@ -12,20 +11,20 @@ var router = mux.NewRouter()
 
 //CreateRoutes function initializes routes
 func CreateRoutes() mux.Router {
-
-	db.ConnectDB()
-
 	//Item routes
-	router.HandleFunc("/item", item.Put).Methods("PUT")
-	router.HandleFunc("/item", item.GetItem).Methods("GET")
-	router.HandleFunc("/item", item.Post).Methods("POST")
-	router.HandleFunc("/item", item.Delete).Methods("DELETE")
+	router.HandleFunc("/item", VerifyTokenMiddleware(item.Put)).Methods("PUT")
+	router.HandleFunc("/item", VerifyTokenMiddleware(item.GetItem)).Methods("GET")
+	router.HandleFunc("/item", VerifyTokenMiddleware(item.Post)).Methods("POST")
+	router.HandleFunc("/item", VerifyTokenMiddleware(item.Delete)).Methods("DELETE")
+
+	router.HandleFunc("/refresh", RefreshToken).Methods("POST")
 
 	//User routes
+	router.HandleFunc("/login", user.Login).Methods("POST")
 	router.HandleFunc("/user", user.Post).Methods("POST")
-	router.HandleFunc("/user", user.Get).Methods("GET")
-	router.HandleFunc("/user", user.Delete).Methods("DELETE")
-	router.HandleFunc("/user", user.Put).Methods("PUT")
+	router.HandleFunc("/user", VerifyTokenMiddleware(user.Get)).Methods("GET")
+	router.HandleFunc("/user", VerifyTokenMiddleware(user.Delete)).Methods("DELETE")
+	router.HandleFunc("/user", VerifyTokenMiddleware(user.Put)).Methods("PUT")
 	return *router
 }
 

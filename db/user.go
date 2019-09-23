@@ -15,11 +15,9 @@ type User struct {
 
 //AddUser func
 func AddUser(user *User) error {
-
 	sqlState := `
 	INSERT INTO app_user (username, full_name)
 	VALUES ($1, $2);`
-
 	_, err := db.Exec(sqlState, user.Username, user.FullName)
 	if err != nil {
 		return err

@@ -1,18 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/ajdinahmetovic/go-rest/routes"
+	"github.com/ajdinahmetovic/item-service/logger"
 )
 
 func main() {
-	fmt.Println("Server starting")
 	var router = routes.CreateRoutes()
 	err := http.ListenAndServe(":3000", &router)
 	if err != nil {
-		fmt.Println("Server failed ", err)
+		logger.Error("Failed to start server", "time", time.Now(), "err", err)
+		return
 	}
-	fmt.Println("Server started")
+	logger.Info("Server started", "time", time.Now())
+
 }

@@ -1,30 +1,34 @@
 package user
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
-	"github.com/ajdinahmetovic/go-rest/db"
 	"github.com/ajdinahmetovic/go-rest/httputil"
+	"github.com/ajdinahmetovic/item-service/proto/v1"
+	"google.golang.org/grpc"
 )
 
 //Delete func
 func Delete(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w)
-
 	v := r.URL.Query()
 	id, err := strconv.Atoi(v.Get("id"))
-
 	if err != nil {
-		httputil.WriteError(w, "Invalid ID", http.StatusInternalServerError)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-
-	err = db.DeleteUser(id)
+	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
 	if err != nil {
-		httputil.WriteError(w, "Error while deleting user", http.StatusInternalServerError)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-
-	httputil.WriteResponse(w, "Successfully deleted", nil)
+	client := proto.NewUserServiceClient(conn)
+	res, err := client.DeleteUser(context.Background(), &proto.DeleteUserReq{ID: int32(id)})
+	if err != nil {
+		httputil.WriteError(w, err, http.StatusInternalServerError)
+		return
+	}
+	httputil.WriteResponse(w, res.Message, nil)
 }

@@ -14,14 +14,26 @@ services:
       - 5432:5432
     networks: 
       apinetwork:
-
-  api:
+  rest:
     build: .
     command: ["go", "run", "main.go"]
     volumes:
       - .:/go/src/github.com/ajdinahmetovic/go-rest
     ports:
       - "3000:3000"
+    depends_on: 
+      - service
+    links:
+      - db
+    networks: 
+      apinetwork:
+  service:
+    build: .
+    command: ["go", "run", "."]
+    volumes:
+      - .:/go/src/github.com/ajdinahmetovic/item-service/server
+    ports:
+      - "4040:4040"
     depends_on: 
       - db
     links:

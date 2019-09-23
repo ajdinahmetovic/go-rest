@@ -14,22 +14,18 @@ type Response struct {
 }
 
 //WriteError sends error response
-func WriteError(w http.ResponseWriter, message string, status int) {
-
+func WriteError(w http.ResponseWriter, err error, status int) {
 	res := Response{
 		ID:      rand.Intn(1000),
-		Message: message,
+		Message: err.Error(),
 	}
-
 	v, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(v)
-
 }
 
 //WriteResponse ...
@@ -39,13 +35,11 @@ func WriteResponse(w http.ResponseWriter, message string, data interface{}) {
 		Message: message,
 		Data:    data,
 	}
-
 	v, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(v)

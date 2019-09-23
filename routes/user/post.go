@@ -1,37 +1,62 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
-	"github.com/ajdinahmetovic/go-rest/db"
 	"github.com/ajdinahmetovic/go-rest/httputil"
+	"github.com/ajdinahmetovic/item-service/db"
+	"github.com/ajdinahmetovic/item-service/proto/v1"
+	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc"
 )
 
 //Post func
 func Post(w http.ResponseWriter, r *http.Request) {
-
 	httputil.EnableCors(&w)
-
 	req, err := ioutil.ReadAll(r.Body)
-
 	if err != nil {
-		httputil.WriteError(w, "Failed to read body", http.StatusInternalServerError)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-
 	var user db.User
 	err = json.Unmarshal(req, &user)
 	if err != nil {
-		httputil.WriteError(w, "Check your JSON", http.StatusInternalServerError)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	err = db.AddUser(&user)
+	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
 	if err != nil {
-		httputil.WriteError(w, "Failed to save user", http.StatusInternalServerError)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-	httputil.WriteResponse(w, "User created successfully", nil)
+	client := proto.NewUserServiceClient(conn)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
+	if err != nil {
+		httputil.WriteError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res, err := client.CreateUser(context.Background(), &proto.CreateUserReq{
+		User: &proto.User{
+			ID:       int32(user.ID),
+			Username: user.Username,
+			FullName: user.FullName,
+			Password: string(hashedPassword),
+		}})
+	if err != nil {
+		httputil.WriteError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	httputil.WriteResponse(w, "User created successfully", map[string]string{
+		"access_token":  res.Token,
+		"refresh_token": res.RefreshToken,
+		"user_id":       strconv.Itoa(int(res.UserID)),
+	})
 }
