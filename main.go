@@ -9,12 +9,11 @@ import (
 )
 
 func main() {
+	logger.InitLogger()
 	var router = routes.CreateRoutes()
-	err := http.ListenAndServe(":3000", &router)
+	err := http.ListenAndServe(":8000", &router)
 	if err != nil {
-		logger.Error("Failed to start server", "time", time.Now(), "err", err)
 		return
 	}
 	logger.Info("Server started", "time", time.Now())
-
 }

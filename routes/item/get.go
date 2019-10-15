@@ -12,9 +12,12 @@ import (
 
 //GetItem func
 func GetItem(w http.ResponseWriter, r *http.Request) {
-	httputil.EnableCors(&w)
-
-	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
+	httputil.EnableCors(&w, r)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return

@@ -15,13 +15,16 @@ import (
 
 //Login func
 func Login(w http.ResponseWriter, r *http.Request) {
-	httputil.EnableCors(&w)
+	httputil.EnableCors(&w, r)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-
 	var userCredidential db.UserCredentials
 	err = json.Unmarshal(req, &userCredidential)
 	if err != nil {
@@ -29,7 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
+	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return

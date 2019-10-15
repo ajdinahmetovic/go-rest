@@ -12,6 +12,11 @@ import (
 //VerifyTokenMiddleware func
 func VerifyTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		httputil.EnableCors(&w, r)
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		authorizationHeader := r.Header.Get("authorization")
 		if authorizationHeader != "" {
 			bearerToken := strings.Split(authorizationHeader, " ")

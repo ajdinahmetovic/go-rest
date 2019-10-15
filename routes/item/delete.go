@@ -12,14 +12,14 @@ import (
 
 //Delete func
 func Delete(w http.ResponseWriter, r *http.Request) {
-	httputil.EnableCors(&w)
+	httputil.EnableCors(&w, r)
 	v := r.URL.Query()
 	id, err := strconv.Atoi(v.Get("id"))
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
+	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return

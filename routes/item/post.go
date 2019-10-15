@@ -14,7 +14,7 @@ import (
 
 //Post func
 func Post(w http.ResponseWriter, r *http.Request) {
-	httputil.EnableCors(&w)
+	httputil.EnableCors(&w, r)
 
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -30,7 +30,7 @@ func Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
+	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
 	if err != nil {
 		httputil.WriteResponse(w, "Connection to item service failed", http.StatusInternalServerError)
 		return

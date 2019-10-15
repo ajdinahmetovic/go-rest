@@ -4,5 +4,4 @@ CREATE TABLE item (
 	description VARCHAR(255),
 	user_id integer,
 	FOREIGN KEY (user_id) REFERENCES app_user (id)
-
 );
