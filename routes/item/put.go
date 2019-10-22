@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ajdinahmetovic/go-rest/config"
 	"github.com/ajdinahmetovic/go-rest/db"
 	"github.com/ajdinahmetovic/go-rest/httputil"
 	"github.com/ajdinahmetovic/item-service/proto/v1"
@@ -15,7 +16,7 @@ import (
 //Put func
 func Put(w http.ResponseWriter, r *http.Request) {
 	httputil.EnableCors(&w, r)
-	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
+	conn, err := grpc.Dial(config.AppCfg.ItemServiceURL, grpc.WithInsecure())
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return

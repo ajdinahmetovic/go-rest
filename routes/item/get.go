@@ -3,11 +3,9 @@ package item
 import (
 	"context"
 	"net/http"
-	"strconv"
 
+	"github.com/ajdinahmetovic/go-rest/es"
 	"github.com/ajdinahmetovic/go-rest/httputil"
-	"github.com/ajdinahmetovic/item-service/proto/v1"
-	"google.golang.org/grpc"
 )
 
 //GetItem func
@@ -17,29 +15,42 @@ func GetItem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
-	if err != nil {
-		httputil.WriteError(w, err, http.StatusInternalServerError)
-		return
-	}
-	client := proto.NewUserServiceClient(conn)
 
-	v := r.URL.Query()
-	id, err := strconv.Atoi(v.Get("id"))
-	if err != nil {
-		id = 0
-	}
-	title := v.Get("title")
-	description := v.Get("description")
-	items, err := client.GetItem(context.Background(), &proto.GetItemReq{
-		ID:          int32(id),
-		Title:       title,
-		Description: description,
-		UserID:      int32(id),
-	})
+	//GetItem from elasticsearch
+	result, err := es.GetItem(context.Background())
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
-	httputil.WriteResponse(w, items.Message, &items.Item)
+
+	/*
+		//Search with grpc and postgress
+		conn, err := grpc.Dial(config.AppCfg.ItemServiceURL, grpc.WithInsecure())
+		if err != nil {
+			httputil.WriteError(w, err, http.StatusInternalServerError)
+			return
+		}
+		client := proto.NewUserServiceClient(conn)
+
+		v := r.URL.Query()
+		id, err := strconv.Atoi(v.Get("id"))
+		if err != nil {
+			id = 0
+		}
+
+		title := v.Get("title")
+		description := v.Get("description")
+		items, err := client.GetItem(context.Background(), &proto.GetItemReq{
+			ID:          int32(id),
+			Title:       title,
+			Description: description,
+			UserID:      int32(id),
+		})
+		if err != nil {
+			httputil.WriteError(w, err, http.StatusInternalServerError)
+			return
+		}
+	*/
+
+	httputil.WriteResponse(w, "Search successfull", &result)
 }

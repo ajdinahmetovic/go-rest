@@ -6,7 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ajdinahmetovic/go-rest/config"
+	"github.com/ajdinahmetovic/go-rest/logger"
+
 	"github.com/ajdinahmetovic/go-rest/db"
+	"github.com/ajdinahmetovic/go-rest/es"
 	"github.com/ajdinahmetovic/go-rest/httputil"
 	"github.com/ajdinahmetovic/item-service/proto/v1"
 	"google.golang.org/grpc"
@@ -30,23 +34,34 @@ func Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := grpc.Dial("service:4040", grpc.WithInsecure())
+	conn, err := grpc.Dial(config.AppCfg.ItemServiceURL, grpc.WithInsecure())
 	if err != nil {
 		httputil.WriteResponse(w, "Connection to item service failed", http.StatusInternalServerError)
 		return
 	}
 
-	client := proto.NewUserServiceClient(conn)
-
-	msg, err := client.CreateItem(context.Background(), &proto.CreateItemReq{Item: &proto.Item{
+	item := &proto.Item{
 		Title:       itemReq.Title,
 		Description: itemReq.Description,
 		UserID:      int32(itemReq.UserID),
-	}})
+	}
+
+	client := proto.NewUserServiceClient(conn)
+	res, err := client.CreateItem(context.Background(), &proto.CreateItemReq{Item: item})
 	if err != nil {
 		httputil.WriteError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	httputil.WriteResponse(w, msg.Message, nil)
+	//Set DB id and insert in es
+	item.ID = res.ID
+	err = es.InsertItem(context.Background(), item)
+	if err != nil {
+		logger.Error("Failed to save item to index", "item", item, "error", err)
+		httputil.WriteError(w, err, http.StatusInternalServerError)
+
+		return
+	}
+
+	httputil.WriteResponse(w, res.Message, nil)
 }
